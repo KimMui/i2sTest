@@ -56,3 +56,7 @@ config TSB_SPIROM
     bool
     default y if BOOT_COPYTORAM
     select ARCH_RAMVECTORS
+
+config ARCH_CHIP_TSB_DEVICE_TABLE_I2S
+    bool
+    default n

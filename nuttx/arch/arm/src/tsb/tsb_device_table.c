@@ -34,10 +34,64 @@
 #include <nuttx/device.h>
 #include <nuttx/device_resource.h>
 #include <nuttx/device_table.h>
+#include <nuttx/device_i2s.h>
 
 #include <arch/tsb/irq.h>
 
 #include "chip.h"
+
+#ifdef CONFIG_ARCH_CHIP_TSB_DEVICE_TABLE_I2S
+static struct device_resource tsb_i2s_resources_0[] = {
+    {
+        .name   = "cg_bridge",
+        .type   = DEVICE_RESOUCE_TYPE_REGS,
+        .start  = SYSCTL_BASE,
+        .count  = SYSCTL_SIZE,
+    },
+    {
+        .name   = "i2slp_sc",
+        .type   = DEVICE_RESOUCE_TYPE_REGS,
+        .start  = I2SLP_SC_BASE,
+        .count  = I2SLP_SC_SIZE,
+    },
+    {
+        .name   = "i2slp_so",
+        .type   = DEVICE_RESOUCE_TYPE_REGS,
+        .start  = I2SLP_SO_BASE,
+        .count  = I2SLP_SO_SIZE,
+    },
+    {
+        .name   = "i2slp_si",
+        .type   = DEVICE_RESOUCE_TYPE_REGS,
+        .start  = I2SLP_SI_BASE,
+        .count  = I2SLP_SI_SIZE,
+    },
+    {
+        .name   = "i2soerr",
+        .type   = DEVICE_RESOUCE_TYPE_IRQ,
+        .start  = TSB_IRQ_I2SOERR,
+        .count  = 1,
+    },
+    {
+        .name   = "i2so",
+        .type   = DEVICE_RESOUCE_TYPE_IRQ,
+        .start  = TSB_IRQ_I2SO,
+        .count  = 1,
+    },
+    {
+        .name   = "i2sierr",
+        .type   = DEVICE_RESOUCE_TYPE_IRQ,
+        .start  = TSB_IRQ_I2SIERR,
+        .count  = 1,
+    },
+    {
+        .name   = "i2si",
+        .type   = DEVICE_RESOUCE_TYPE_IRQ,
+        .start  = TSB_IRQ_I2SI,
+        .count  = 1,
+    },
+};
+#endif
 
 static struct device tsb_device_table[] = {
 };
