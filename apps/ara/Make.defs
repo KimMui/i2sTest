@@ -77,6 +77,10 @@ ifeq ($(CONFIG_ARA_LG_MAIN),y)
 CONFIGURED_APPS += ara/lg
 endif
 
+ifeq ($(CONFIG_ARA_I2S_TEST),y)
+CONFIGURED_APPS += ara/i2s
+endif
+
 ifeq ($(CONFIG_GPBRIDGE),y)
 CONFIGURED_APPS += ara/gpbridge
 endif
