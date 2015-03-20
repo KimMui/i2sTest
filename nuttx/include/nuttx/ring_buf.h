@@ -273,6 +273,7 @@ static inline void *ring_buf_pull(struct ring_buf *rb, unsigned int len)
     return rb->head;
 }
 
+#ifdef CONFIG_LIB_RING_BUF
 void ring_buf_init(struct ring_buf *rb, void *buf, unsigned int headroom,
                    unsigned int data_len);
 struct ring_buf *ring_buf_alloc(unsigned int headroom, unsigned int data_len,
@@ -290,5 +291,36 @@ struct ring_buf *ring_buf_alloc_ring(unsigned int entries,
 void ring_buf_free_ring(struct ring_buf *first_rb,
                         void (*free_callback)(struct ring_buf *rb, void *arg),
                                               void *arg);
+#else
+void ring_buf_init(struct ring_buf *rb, void *buf, unsigned int headroom,
+                   unsigned int data_len)
+{
+}
+struct ring_buf *ring_buf_alloc(unsigned int headroom, unsigned int data_len,
+                                unsigned int tailroom)
+{
+    return NULL;
+}
+void ring_buf_free(struct ring_buf *rb)
+{
+}
+struct ring_buf *ring_buf_alloc_ring(unsigned int entries,
+                                     unsigned int headroom,
+                                     unsigned int data_len,
+                                     unsigned int tailroom,
+                                     int (*alloc_callback)(struct ring_buf *rb,
+                                                           void *arg),
+                                     void (*free_callback)(struct ring_buf *rb,
+                                                           void *arg),
+                                     void *arg)
+{
+    return NULL;
+}
+void ring_buf_free_ring(struct ring_buf *first_rb,
+                        void (*free_callback)(struct ring_buf *rb, void *arg),
+                                              void *arg)
+{
+}
+#endif
 
 #endif /* __INCLUDE_NUTTX_RING_BUF_H */
