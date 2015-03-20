@@ -41,7 +41,7 @@
 
 #define DEFAULT_STACK_SIZE      2048
 #define TYPE_RESPONSE_FLAG      0x80
-#define TIMEOUT_IN_MS           1000
+#define TIMEOUT_IN_MS           (10 * 60 * 1000)
 #define GB_INVALID_TYPE         0
 
 #define ONE_SEC_IN_MSEC         1000
