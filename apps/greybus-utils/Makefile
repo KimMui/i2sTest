@@ -71,6 +71,10 @@ ifeq ($(CONFIG_MANIFEST_CONSOLE), y)
  MANIFEST = simple-uart-module
 endif
 
+ifeq ($(CONFIG_MANIFEST_I2S_APB1_ONLY), y)
+ MANIFEST = simple-i2s-apb1-only-module
+endif
+
 ifeq ($(CONFIG_CUSTOM_MANIFEST), y)
  MANIFEST = $(subst ",,$(CONFIG_MANIFEST))
 endif
