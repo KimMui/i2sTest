@@ -39,6 +39,7 @@
 #include <arch/tsb/irq.h>
 
 #include "chip.h"
+#include "tsb_i2s.h"
 
 #ifdef CONFIG_ARCH_CHIP_TSB_DEVICE_TABLE_I2S
 static struct device_resource tsb_i2s_resources_0[] = {
@@ -93,7 +94,25 @@ static struct device_resource tsb_i2s_resources_0[] = {
 };
 #endif
 
+#ifdef CONFIG_ARCH_CHIP_TSB_I2S
+struct tsb_i2s_init_data tsb_i2s_data = {
+    .mclk_role  = TSB_I2S_CLK_ROLE_MASTER,
+    .mclk_freq  = 0, /* N/A */
+};
+#endif
+
 static struct device tsb_device_table[] = {
+#ifdef CONFIG_ARCH_CHIP_TSB_I2S
+    {
+        .class          = DEVICE_CLASS_I2S_HW,
+        .name           = "tsb_i2s",
+        .desc           = "TSB I2S Controller",
+        .id             = 0,
+        .resources      = tsb_i2s_resources_0,
+        .resource_count = ARRAY_SIZE(tsb_i2s_resources_0),
+        .init_data      = &tsb_i2s_data,
+    },
+#endif
 };
 
 int tsb_device_table_register(void)

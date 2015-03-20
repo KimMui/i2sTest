@@ -28,16 +28,18 @@
  * @author Mark Greer
  */
 
-#include <errno.h>
+#ifndef __ARCH_ARM_TSB_TSB_I2S_H
+#define __ARCH_ARM_TSB_TSB_I2S_H
 
-#include <nuttx/util.h>
-#include <nuttx/device.h>
+enum tsb_i2s_clk_role {
+    TSB_I2S_CLK_ROLE_INVALID,
+    TSB_I2S_CLK_ROLE_MASTER,
+    TSB_I2S_CLK_ROLE_SLAVE,
+};
 
-struct device_driver tsb_i2s_driver;
+struct tsb_i2s_init_data {
+    enum tsb_i2s_clk_role   mclk_role;
+    uint32_t                mclk_freq;
+};
 
-void tsb_driver_register(void)
-{
-#ifdef CONFIG_ARCH_CHIP_TSB_I2S
-    device_register_driver(&tsb_i2s_driver);
-#endif
-}
+#endif /* __ARCH_ARM_TSB_TSB_I2S_H */
