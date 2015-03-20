@@ -74,6 +74,7 @@ struct device {
     void                    *private;
 };
 
+#ifdef CONFIG_DEVICE_CORE
 /* Called by device driver clients */
 struct device *device_open(char *class, unsigned int id);
 void device_close(struct device *dev);
@@ -81,5 +82,19 @@ void device_close(struct device *dev);
 /* Called by device drivers */
 int device_register_driver(struct device_driver *driver);
 void device_unregister_driver(struct device_driver *driver);
+#else
+static inline struct device *device_open(char *class, unsigned int id) {
+    return -EINVAL;
+}
+static inline void device_close(struct device *dev)
+{
+}
+static inline int device_register_driver(struct device_driver *driver) {
+    return -EINVAL;
+}
+static inline void device_unregister_driver(struct device_driver *driver)
+{
+}
+#endif
 
 #endif /* __INCLUDE_NUTTX_DEVICE_H */
