@@ -70,3 +70,13 @@ config ARCH_CHIP_TSB_I2S
     default n
     ---help---
         TSB I2S Host Controller Driver
+
+config ARCH_CHIP_TSB_I2S_STUB
+    bool "I2S Support Stub"
+    depends on (ARCH_CHIP_APBRIDGE || ARCH_CHIP_GPBRIDGE) && !ARCH_CHIP_TSB_I2S
+    select DEVICE_CORE
+    select LIB_RING_BUF
+    select ARCH_CHIP_TSB_DEVICE_TABLE_I2S
+    default n
+    ---help---
+        TSB I2S Host Controller Driver stub useful for testing.

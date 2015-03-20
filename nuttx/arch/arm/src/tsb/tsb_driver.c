@@ -34,10 +34,14 @@
 #include <nuttx/device.h>
 
 struct device_driver tsb_i2s_driver;
+struct device_driver tsb_i2s_stub_driver;
 
 void tsb_driver_register(void)
 {
 #ifdef CONFIG_ARCH_CHIP_TSB_I2S
     device_register_driver(&tsb_i2s_driver);
+#endif
+#ifdef CONFIG_ARCH_CHIP_TSB_I2S_STUB
+    device_register_driver(&tsb_i2s_stub_driver);
 #endif
 }
