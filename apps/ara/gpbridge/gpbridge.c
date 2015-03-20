@@ -6,6 +6,7 @@
 
 #include <arch/tsb/unipro.h>
 #include <arch/tsb/device_table.h>
+#include <arch/tsb/driver.h>
 #include <apps/greybus-utils/utils.h>
 
 int bridge_main(int argc, char *argv[])
@@ -20,6 +21,7 @@ int bridge_main(int argc, char *argv[])
     enable_cports();
 
     tsb_device_table_register();
+    tsb_driver_register();
 
 #ifdef CONFIG_EXAMPLES_NSH
     printf("Calling NSH\n");

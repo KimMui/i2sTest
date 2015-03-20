@@ -49,4 +49,5 @@ endif
 
 ifeq ($(CONFIG_DEVICE_CORE),y)
 CHIP_CSRCS += tsb_device_table.c
+CHIP_CSRCS += tsb_driver.c
 endif
