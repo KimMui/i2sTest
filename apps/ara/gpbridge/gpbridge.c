@@ -16,12 +16,12 @@ int bridge_main(int argc, char *argv[])
     display_init();
 #endif
 
+    tsb_device_table_register();
+    tsb_driver_register();
+
     enable_manifest("MID-1", NULL);
     gb_unipro_init();
     enable_cports();
-
-    tsb_device_table_register();
-    tsb_driver_register();
 
 #ifdef CONFIG_EXAMPLES_NSH
     printf("Calling NSH\n");
