@@ -69,6 +69,10 @@ struct svc_connection {
 #define DEMO_GPIO_APB2_CPORT    (5)
 #define DEMO_I2C_APB1_CPORT     (1)
 #define DEMO_I2C_APB2_CPORT     (4)
+#define DEMO_I2S_MGMT_APB1_CPORT     (2)
+#define DEMO_I2S_MGMT_APB2_CPORT     (6)
+#define DEMO_I2S_DATA_APB1_CPORT     (3)
+#define DEMO_I2S_DATA_APB2_CPORT     (7)
 
 /* Interface name to deviceID mapping table */
 static struct svc_interface_device_id devid[] = {
@@ -82,6 +86,12 @@ static struct svc_connection conn[] = {
     { DEV_ID_APB1, DEMO_GPIO_APB1_CPORT, DEV_ID_APB2, DEMO_GPIO_APB2_CPORT },
     // APB1, CPort 1 <-> APB2, CPort 4, for I2C
     { DEV_ID_APB1, DEMO_I2C_APB1_CPORT, DEV_ID_APB2, DEMO_I2C_APB2_CPORT },
+    /* APB1, CPort 2 <-> APB2, CPort 6, for I2S mgmt */
+    { DEV_ID_APB1, DEMO_I2S_MGMT_APB1_CPORT,
+      DEV_ID_APB2, DEMO_I2S_MGMT_APB2_CPORT },
+    /* APB1, CPort 3 <-> APB2, CPort 7, for I2S data */
+    { DEV_ID_APB1, DEMO_I2S_DATA_APB1_CPORT,
+      DEV_ID_APB2, DEMO_I2S_DATA_APB2_CPORT },
 };
 
 

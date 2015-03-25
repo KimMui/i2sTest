@@ -22,18 +22,30 @@ string = "Project Ara"
 ; Module product string (id can't be 0)
 [string-descriptor "2"]
 id = 2
-string = "Simple I2S Module"
+string = "Simple GPIO, I2C, I2S Mgmt, I2s Rx Module"
 
-; I2S management protocol on CPort 5 (APB2 Mgmt CPort)
+; GPIO protocol on CPort 5
 [cport-descriptor "5"]
 interface = 0
 id = 5
-protocol = 0xa
+protocol = 0x02
 
-; I2S data protocol on CPort 4 (APB2 Receiver CPort)
+; I2C protocol on CPort 4
 [cport-descriptor "4"]
 interface = 0
 id = 4
+protocol = 0x03
+
+; I2S management protocol on CPort 6 (APB2 Mgmt CPort)
+[cport-descriptor "6"]
+interface = 0
+id = 6
+protocol = 0xa
+
+; I2S data protocol on CPort 7 (APB2 Receiver CPort)
+[cport-descriptor "7"]
+interface = 0
+id = 7
 protocol = 0x11
 
 ; Interface 0
