@@ -258,6 +258,7 @@ static void *tsb_i2s_stub_rx_thread(void *data)
 
 unsigned int mag_tx_count = 0;
 
+#if 0 /* XXX */
 static void *tsb_i2s_stub_tx_thread(void *data)
 {
 	struct tsb_i2s_stub_info *info = data;
@@ -299,6 +300,7 @@ static void *tsb_i2s_stub_tx_thread(void *data)
 
     return NULL;
 }
+#endif
 
 static int tsb_i2s_stub_op_get_processing_delay(struct device *dev,
                                            uint32_t *processing_delay)
@@ -462,13 +464,38 @@ static int tsb_i2s_stub_op_prepare_transmitter(struct device *dev,
 static int tsb_i2s_stub_op_start_transmitter(struct device *dev)
 {
     struct tsb_i2s_stub_info *info = dev->private;
+	struct ring_buf *rb;
+	enum device_i2s_event event;
+    unsigned int count = 0;
 
-    if (!tsb_i2s_stub_tx_is_prepared(info) || tsb_i2s_stub_tx_is_active(info))
-        return -EIO;
+    if (!tsb_i2s_stub_tx_is_active(info))
+        info->flags |= TSB_I2S_STUB_FLAG_TX_ACTIVE;
 
-    info->flags |= TSB_I2S_STUB_FLAG_TX_ACTIVE;
+	rb = info->tx_rb;
 
-    pthread_cond_signal(&info->tx_cond);
+    while (ring_buf_is_consumers(rb) && !ring_buf_is_empty(rb) &&
+           (count++ < 4)) {
+
+mag_tx_count++;
+
+        /* Discard data, zero buffer */
+        memset(ring_buf_get_head(rb), 0, ring_buf_len(rb));
+
+        if (ring_buf_len(rb) % 4)
+{
+lldbg("ring buf len: %d\n", ring_buf_len(rb));
+            event = DEVICE_I2S_EVENT_DATA_LEN;
+}
+        else
+            event = DEVICE_I2S_EVENT_TX_COMPLETE;
+
+        ring_buf_reset(rb);
+        ring_buf_pass(rb);
+
+        info->tx_callback(rb, event, info->tx_arg);
+
+        rb = ring_buf_get_next(rb);
+    }
 
     return 0;
 }
@@ -533,10 +560,12 @@ static int tsb_i2s_stub_dev_open(struct device *dev)
     if (ret)
         goto err_kill_rx_thread;
 
+#if 0 /* XXX */
     ret = pthread_create(&info->tx_thread, NULL, tsb_i2s_stub_tx_thread,
                          info);
     if (ret)
         goto err_kill_rx_thread;
+#endif
 
     info->flags = TSB_I2S_STUB_FLAG_OPEN;
 
