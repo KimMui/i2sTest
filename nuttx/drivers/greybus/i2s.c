@@ -238,8 +238,10 @@ static void gb_i2s_report_event(struct gb_i2s_info *info, uint32_t event)
     struct gb_operation *operation;
     struct gb_operation_hdr *hdr;
     struct gb_i2s_report_event_request *request;
+    int ret;
 
-#if 0 /* XXX - causes panic on AP (need rx handler in i2s_mgmt.c) */
+lldbg("--- Report event: %d\n", event); /* XXX */
+
     operation = gb_operation_create(info->mgmt_cport,
                                     GB_I2S_MGMT_TYPE_REPORT_EVENT,
                                     sizeof(*hdr) + sizeof(*request));
@@ -250,10 +252,11 @@ static void gb_i2s_report_event(struct gb_i2s_info *info, uint32_t event)
     request->event = event;
 
     /* XXX Shut things down if can't reach AP? */
-    gb_operation_send_request_sync(operation);
-#else
-lldbg("--- Report event: %d\n", event); /* XXX */
-#endif
+    ret = gb_operation_send_request(operation, NULL, false);
+    if (ret)
+        lldbg("--- Can't report event %d: %d\n", event, ret); /* XXX */
+
+    gb_operation_destroy(operation);
 }
 
 static void gb_i2s_ll_tx(struct gb_i2s_info *info, uint8_t *data); /* XXX */
@@ -452,6 +455,9 @@ static uint8_t gb_i2s_receiver_send_data_req_handler(
     }
 
     if (request->size != info->msg_data_size) {
+
+lldbg("req->size: %d, msg_size: %d\n", request->size, info->msg_data_size);
+
         gb_i2s_report_event(info, GB_I2S_EVENT_DATA_LEN);
         return 0;
     }
@@ -478,7 +484,7 @@ lldbg("--- fill missing data - req #: 0x%x, info #: 0x%x\n", /* XXX */
 #else
         mag_gb_or++; /* XXX */
 #endif
-        return 0;
+        return GB_OP_OVERFLOW;
     }
 
     gb_i2s_ll_tx(info, request->data);
