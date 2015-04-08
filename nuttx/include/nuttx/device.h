@@ -44,6 +44,7 @@ enum device_state {
     DEVICE_STATE_REMOVING,
 };
 
+struct device_i2s_type_ops;
 struct device_pll_type_ops;
 
 struct device_driver_ops {
@@ -52,6 +53,7 @@ struct device_driver_ops {
     int     (*open)(struct device *dev);
     void    (*close)(struct device *dev);
     union {
+        struct device_i2s_type_ops     *i2s;
         struct device_pll_type_ops     *pll;
     } type_ops;
 };
