@@ -77,6 +77,10 @@ config ARCH_CHIP_TSB_PLL
 	---help---
         TSB PLL Controller Driver
 
+config ARCH_CHIP_DEVICE_I2S
+    bool
+    default n
+
 choice
 	prompt "Drive Strength for the TRACE Signals"
 	default TSB_TRACE_DRIVESTRENGTH_MAX
