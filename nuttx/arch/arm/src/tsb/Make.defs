@@ -55,3 +55,7 @@ endif
 ifeq ($(CONFIG_ARCH_CHIP_TSB_PLL),y)
 CHIP_CSRCS += tsb_pll.c
 endif
+
+ifeq ($(CONFIG_ARCH_CHIP_TSB_I2S),y)
+CHIP_CSRCS += tsb_i2s.c
+endif
