@@ -1,0 +1,50 @@
+;
+; Simple GPIO, I2C, and I2S Interface Manifest
+;
+
+[manifest-header]
+version-major = 0
+version-minor = 1
+
+[interface-descriptor]
+vendor-string-id = 1
+product-string-id = 2
+
+; Interface vendor string (id can't be 0)
+[string-descriptor "1"]
+id = 1
+string = "Project Ara"
+
+; Interface product string (id can't be 0)
+[string-descriptor "2"]
+id = 2
+string = "Simple GPIO, I2C, and I2S Interface"
+
+; GPIO protocol on CPort 5
+[cport-descriptor "5"]
+bundle = 0
+id = 5
+protocol = 0x02
+
+; I2C protocol on CPort 4
+[cport-descriptor "4"]
+bundle = 0
+id = 4
+protocol = 0x03
+
+; I2S MGMT protocol on CPort 6
+[cport-descriptor "6"]
+bundle = 0
+id = 6
+protocol = 0x0a
+
+; I2S RX protocol on CPort 7
+[cport-descriptor "7"]
+bundle = 0
+id = 7
+protocol = 0x12
+
+; Bundle 0
+[bundle-descriptor "0"]
+id = 0
+class = 0x00

@@ -48,6 +48,8 @@ extern void gb_gpio_register(int cport);
 extern void gb_i2c_register(int cport);
 extern void gb_battery_register(int cport);
 extern void gb_loopback_register(int cport);
+extern void gb_i2s_mgmt_register(int cport);
+extern void gb_i2s_receiver_register(int cport);
 
 struct greybus {
     /* TODO use a list instead */
@@ -123,6 +125,14 @@ void enable_cports(void)
                 gb_loopback_register(id);
             }
 #endif
+            if (protocol == GREYBUS_PROTOCOL_I2S_MGMT) {
+                gb_info("Registering I2S MGMT greybus driver.\n");
+                gb_i2s_mgmt_register(id);
+            }
+            if (protocol == GREYBUS_PROTOCOL_I2S_RECEIVER) {
+                gb_info("Registering I2S RECEIVER greybus driver.\n");
+                gb_i2s_receiver_register(id);
+            }
         }
         i++;
     }
