@@ -45,6 +45,14 @@
     #define ONE_BIT_IS_SET(x)   ((x) && !((x) & ((x) - 1)))
 #endif
 
+#ifndef MIN
+    #define MIN(a, b)   (((a) < (b)) ? (a) : (b))
+#endif
+
+#ifndef MAX
+    #define MAX(a, b)   (((a) > (b)) ? (a) : (b))
+#endif
+
 #endif
 
 

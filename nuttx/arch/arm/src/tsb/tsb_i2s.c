@@ -33,7 +33,7 @@
  *  MCLK    - Master Clock: used to drive the other clocks.
  *  BCLK    - Bit Clock: used for clocking each bit in/out.
  *            Also referred to as SCLK (Serial Clock).
- *  WCLK    - Left/Right Clock: determines which channel audio data is for.
+ *  WCLK    - Word Clock: determines which channel audio data is for.
  *            Also referred to as LRCLK (Left-right Clock).
  */
 
