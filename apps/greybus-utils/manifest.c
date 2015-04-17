@@ -140,7 +140,7 @@ static int identify_descriptor(struct greybus_descriptor *desc, size_t size,
 {
     struct greybus_descriptor_header *desc_header = &desc->header;
     size_t expected_size;
-    int desc_size;
+    size_t desc_size;
     struct gb_cport *cport;
 
     if (size < sizeof(*desc_header)) {
@@ -154,45 +154,52 @@ static int identify_descriptor(struct greybus_descriptor *desc, size_t size,
         return -EINVAL;
     }
 
+    /* Descriptor needs to at least have a header */
+    expected_size = sizeof(*desc_header);
+
     switch (desc_header->type) {
-    case GREYBUS_TYPE_MODULE:
-        if (desc_size < sizeof(struct greybus_descriptor_module)) {
-            gb_error("module descriptor too small (%u)\n", desc_size);
-            return -EINVAL;
-        }
-        break;
     case GREYBUS_TYPE_STRING:
-        expected_size = sizeof(struct greybus_descriptor_header);
         expected_size += sizeof(struct greybus_descriptor_string);
-        expected_size += (size_t) desc->string.length;
-        if (desc_size < expected_size) {
-            gb_error("string descriptor too small (%u)\n", desc_size);
-            return -EINVAL;
-        }
+        expected_size += desc->string.length;
+
+        /* String descriptors are padded to 4 byte boundaries */
+        expected_size = ALIGN(expected_size, 4);
         break;
     case GREYBUS_TYPE_INTERFACE:
+        expected_size += sizeof(struct greybus_descriptor_interface);
+        break;
+    case GREYBUS_TYPE_BUNDLE:
+        expected_size += sizeof(struct greybus_descriptor_bundle);
         break;
     case GREYBUS_TYPE_CPORT:
-        if (desc_size < sizeof(struct greybus_descriptor_cport)) {
-            gb_error("cport descriptor too small (%u)\n", desc_size);
-            return -EINVAL;
+        expected_size += sizeof(struct greybus_descriptor_cport);
+        if (desc_size >= expected_size) {
+            if (!release) {
+                cport = alloc_cport();
+                cport->id = desc->cport.id;
+                cport->protocol = desc->cport.protocol_id;
+                gb_debug("cport_id = %d\n", cport->id);
+            } else {
+                free_cport(desc->cport.id);
+            }
         }
-        if (!release) {
-            cport = alloc_cport();
-            cport->id = desc->cport.id;
-            cport->protocol = desc->cport.protocol;
-            gb_debug("cport_id = %d\n", cport->id);
-        } else {
-            free_cport(desc->cport.id);
-        }
-        break;
-    case GREYBUS_TYPE_CLASS:
-        gb_debug("class descriptor found (ignoring)\n");
         break;
     case GREYBUS_TYPE_INVALID:
     default:
         gb_error("invalid descriptor type (%hhu)\n", desc_header->type);
         return -EINVAL;
+    }
+
+    if (desc_size < expected_size) {
+        gb_error("%d: descriptor too small (%zu < %zu)\n",
+                 desc_header->type, desc_size, expected_size);
+        return -EINVAL;
+    }
+
+    /* Descriptor bigger than what we expect */
+    if (desc_size > expected_size) {
+        gb_debug("%d descriptor size mismatch, expected - %zu, actual - %zu)\n",
+                 desc_header->type, expected_size, desc_size);
     }
 
     return desc_size;
@@ -201,10 +208,9 @@ static int identify_descriptor(struct greybus_descriptor *desc, size_t size,
 bool _manifest_parse(void *data, size_t size, int release)
 {
     struct greybus_manifest *manifest = data;
-    struct greybus_manifest_header *header;
+    struct greybus_manifest_header *header = &manifest->header;
     struct greybus_descriptor *desc;
     uint16_t manifest_size;
-    bool result = false;
 
     if (!release) {
         /* we have to have at _least_ the manifest header */
@@ -214,7 +220,6 @@ bool _manifest_parse(void *data, size_t size, int release)
         }
 
         /* Make sure the size is right */
-        header = &manifest->header;
         manifest_size = le16toh(header->size);
         if (manifest_size != size) {
             gb_error("manifest size mismatch %zu != %hu\n", size,
@@ -238,22 +243,17 @@ bool _manifest_parse(void *data, size_t size, int release)
         int desc_size;
 
         desc_size = identify_descriptor(desc, size, release);
-        if (desc_size <= 0) {
-            if (!desc_size)
-                gb_error("zero-sized manifest descriptor\n");
-            result = false;
-            goto out;
-        }
+        if (desc_size <= 0)
+            return false;
         desc = (struct greybus_descriptor *)((char *)desc + desc_size);
         size -= desc_size;
     }
 
- out:
-    return result;
+    return true;
 }
 
 /*
- * Parse a buffer containing a module manifest.
+ * Parse a buffer containing a interface manifest.
  *
  * If we find anything wrong with the content/format of the buffer
  * we reject it.
@@ -277,18 +277,18 @@ bool manifest_release(void *data, size_t size)
     return _manifest_parse(data, size, 1);
 }
 
-static int get_module_id(char *fname)
+static int get_interface_id(char *fname)
 {
-    char *mid_str;
-    int mid = 0;
+    char *iid_str;
+    int iid = 0;
     char tmp[256];
 
     strcpy(tmp, fname);
-    mid_str = strtok(tmp, "-");
-    if (!strncmp(mid_str, "MID", 3))
-        mid = strtol(fname + 4, NULL, 0);
+    iid_str = strtok(tmp, "-");
+    if (!strncmp(iid_str, "IID", 3))
+        iid = strtol(fname + 4, NULL, 0);
 
-    return mid;
+    return iid;
 }
 
 char *get_manifest_blob(void *data)
@@ -328,12 +328,12 @@ void enable_manifest(char *name, void *priv)
     hpe = get_manifest_blob(priv);
     if (hpe) {
         parse_manifest_blob(hpe);
-        int mid = get_module_id(name);
-        if (mid > 0) {
-            gb_info("%s module inserted\n", name);
+        int iid = get_interface_id(name);
+        if (iid > 0) {
+            gb_info("%s interface inserted\n", name);
             free(hpe);
         } else {
-            gb_error("invalid module ID, no hotplug plug event sent\n");
+            gb_error("invalid interface ID, no hotplug plug event sent\n");
         }
     } else {
         gb_error("missing manifest blob, no hotplug event sent\n");
