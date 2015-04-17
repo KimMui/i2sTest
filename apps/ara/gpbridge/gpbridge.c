@@ -14,7 +14,7 @@ int bridge_main(int argc, char *argv[])
     display_init();
 #endif
 
-    enable_manifest("MID-1", NULL);
+    enable_manifest("IID-1", NULL);
     gb_unipro_init();
     enable_cports();
 

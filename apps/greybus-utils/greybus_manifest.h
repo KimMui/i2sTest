@@ -29,15 +29,12 @@
 #ifndef __GREYBUS_MANIFEST_H
 #define __GREYBUS_MANIFEST_H
 
-#pragma pack(push, 1)
-
 enum greybus_descriptor_type {
     GREYBUS_TYPE_INVALID = 0x00,
-    GREYBUS_TYPE_MODULE = 0x01,
+    GREYBUS_TYPE_INTERFACE = 0x01,
     GREYBUS_TYPE_STRING = 0x02,
-    GREYBUS_TYPE_INTERFACE = 0x03,
+    GREYBUS_TYPE_BUNDLE = 0x03,
     GREYBUS_TYPE_CPORT = 0x04,
-    GREYBUS_TYPE_CLASS = 0x05,
 };
 
 enum greybus_protocol {
@@ -85,19 +82,6 @@ enum greybus_class_type {
 };
 
 /*
- * A module descriptor describes information about a module as a
- * whole, *not* the functions within it.
- */
-struct greybus_descriptor_module {
-    __le16 vendor;
-    __le16 product;
-    __le16 version;
-    __u8 vendor_stringid;
-    __u8 product_stringid;
-    __le64 unique_id;
-};
-
-/*
  * The string in a string descriptor is not NUL-terminated.  The
  * size of the descriptor will be rounded up to a multiple of 4
  * bytes, by padding the string with 0x00 bytes if necessary.
@@ -106,74 +90,83 @@ struct greybus_descriptor_string {
     __u8 length;
     __u8 id;
     __u8 string[0];
-};
+} __packed;
 
 /*
- * An interface descriptor simply defines a module-unique id for
- * each interface present on a module.  Its sole purpose is to allow
- * CPort descriptors to specify which interface they are associated
- * with.  Normally there's only one interface, with id 0.  The
- * second one must have id 1, and so on consecutively.
- *
- * The largest CPort id associated with an interface (defined by a
- * CPort descriptor in the manifest) is used to determine how to
- * encode the device id and module number in UniPro packets
- * that use the interface.
+ * An interface descriptor describes information about an interface as a whole,
+ * *not* the functions within it.
  */
 struct greybus_descriptor_interface {
-    __u8 id;                    /* module-relative id (0..) */
-};
+    __u8 vendor_stringid;
+    __u8 product_stringid;
+    __u8 pad[2];
+} __packed;
 
 /*
- * A CPort descriptor indicates the id of the interface within the
+ * An bundle descriptor defines an identification number and a class for
+ * each bundle.
+ *
+ * @id: Uniquely identifies a bundle within a interface, its sole purpose is to
+ * allow CPort descriptors to specify which bundle they are associated with.
+ * The first bundle will have id 0, second will have 1 and so on.
+ *
+ * The largest CPort id associated with an bundle (defined by a
+ * CPort descriptor in the manifest) is used to determine how to
+ * encode the device id and module number in UniPro packets
+ * that use the bundle.
+ *
+ * @class: It is used by kernel to know the functionality provided by the
+ * bundle and will be matched against drivers functinality while probing greybus
+ * driver. It should contain one of the values defined in
+ * 'enum greybus_class_type'.
+ *
+ */
+struct greybus_descriptor_bundle {
+    __u8 id;        /* interface-relative id (0..) */
+    __u8 class;
+    __u8 pad[2];
+} __packed;
+
+/*
+ * A CPort descriptor indicates the id of the bundle within the
  * module it's associated with, along with the CPort id used to
- * address the CPort.  The protocol defines the format of messages
+ * address the CPort.  The protocol id defines the format of messages
  * exchanged using the CPort.
  */
 struct greybus_descriptor_cport {
-    __u8 interface;
     __le16 id;
-    __u8 protocol;              /* enum greybus_protocol */
-};
-
-/*
- * A class descriptor defines functionality supplied by a module.
- * Beyond that, not much else is defined yet...
- */
-struct greybus_descriptor_class {
-    __u8 class;                 /* enum greybus_class_type */
-};
+    __u8 bundle;
+    __u8 protocol_id;        /* enum greybus_protocol */
+} __packed;
 
 struct greybus_descriptor_header {
     __le16 size;
     __u8 type;                  /* enum greybus_descriptor_type */
-};
+    __u8 pad;
+} __packed;
 
 struct greybus_descriptor {
     struct greybus_descriptor_header header;
     union {
-        struct greybus_descriptor_module module;
         struct greybus_descriptor_string string;
         struct greybus_descriptor_interface interface;
+        struct greybus_descriptor_bundle bundle;
         struct greybus_descriptor_cport cport;
-        struct greybus_descriptor_class class;
     };
-};
+} __packed;
 
 struct greybus_manifest_header {
     __le16 size;
     __u8 version_major;
     __u8 version_minor;
-};
+} __packed;
 
 struct greybus_manifest {
     struct greybus_manifest_header header;
     struct greybus_descriptor descriptors[0];
-};
+} __packed;
 
 char *get_manifest_blob(void *data);
 void parse_manifest_blob(char *hpe);
-
-#pragma pack(pop)
 
 #endif                          /* __GREYBUS_MANIFEST_H */
