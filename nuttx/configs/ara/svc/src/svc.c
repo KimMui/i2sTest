@@ -85,6 +85,7 @@ struct svc_connection {
  */
 #define DEV_ID_APB1             (1)
 #define DEV_ID_APB2             (2)
+#define DEV_ID_SPRING4          (6)
 #define DEV_ID_SPRING6          (8)
 #define DEMO_GPIO_APB1_CPORT    (0)
 #define DEMO_GPIO_APB2_CPORT    (5)
@@ -101,25 +102,23 @@ struct svc_connection {
 static struct svc_interface_device_id devid[] = {
     { "apb1", DEV_ID_APB1 },
     { "apb2", DEV_ID_APB2 },
+    { "spring4", DEV_ID_SPRING4 },
     { "spring6", DEV_ID_SPRING6 },
 };
 
 /* Connections table */
 static struct svc_connection conn[] = {
 #if defined(CONFIG_SVC_ROUTE_DEFAULT)
-    // APB1, CPort 0 <-> APB2, CPort 5, for GPIO
-    { DEV_ID_APB1, DEMO_GPIO_APB1_CPORT, DEV_ID_APB2, DEMO_GPIO_APB2_CPORT },
-    // APB1, CPort 1 <-> APB2, CPort 4, for I2C
-    { DEV_ID_APB1, DEMO_I2C_APB1_CPORT, DEV_ID_APB2, DEMO_I2C_APB2_CPORT },
-    // APB1, CPort 2 <-> APB2, CPort 6, for I2S MGMT
+    // APB1, CPort 0 <-> SPRING4, CPort 5, for GPIO
+    { DEV_ID_APB1, DEMO_GPIO_APB1_CPORT, DEV_ID_SPRING4, DEMO_GPIO_APB2_CPORT },
+    // APB1, CPort 1 <-> SPRING4, CPort 4, for I2C
+    { DEV_ID_APB1, DEMO_I2C_APB1_CPORT, DEV_ID_SPRING4, DEMO_I2C_APB2_CPORT },
+    // APB1, CPort 2 <-> SPRING4, CPort 6, for I2S MGMT
     { DEV_ID_APB1, DEMO_I2S_MGMT_APB1_CPORT,
-      DEV_ID_APB2, DEMO_I2S_MGMT_APB2_CPORT },
-    // APB1, CPort 3 <-> APB2, CPort 7, for I2S RX
+      DEV_ID_SPRING4, DEMO_I2S_MGMT_APB2_CPORT },
+    // APB1, CPort 3 <-> SPRING4, CPort 7, for I2S RX
     { DEV_ID_APB1, DEMO_I2S_RX_APB1_CPORT,
-      DEV_ID_APB2, DEMO_I2S_RX_APB2_CPORT },
-
-    // APB1, CPort 16 <-> APB2, CPort 16, for DSI
-    { DEV_ID_APB1, DEMO_DSI_APB1_CPORT, DEV_ID_APB2, DEMO_DSI_APB2_CPORT },
+      DEV_ID_SPRING4, DEMO_I2S_RX_APB2_CPORT },
 #elif defined(CONFIG_SVC_ROUTE_SPRING6_APB2)
     // SPRING6, CPort 0 <-> APB2, CPort 5, for GPIO
     { DEV_ID_SPRING6, DEMO_GPIO_APB1_CPORT, DEV_ID_APB2, DEMO_GPIO_APB2_CPORT },
