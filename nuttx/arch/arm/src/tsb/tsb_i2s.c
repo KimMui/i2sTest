@@ -792,7 +792,9 @@ static uint32_t tsb_i2s_get_block_base(struct tsb_i2s_info *info,
         base = info->si_base;
         break;
     default:
+#if 0 /* XXX */
         lldbg("Bogus block: %d\n", block);
+#endif
         base = 0;
     }
 
