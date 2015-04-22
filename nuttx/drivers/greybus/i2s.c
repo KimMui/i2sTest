@@ -253,8 +253,10 @@ static void gb_i2s_report_event(struct gb_i2s_info *info, uint32_t event)
 
     /* XXX Shut things down if can't reach AP? */
     ret = gb_operation_send_request(operation, NULL, false);
+#if 0 /* XXX */
     if (ret)
         lldbg("--- Can't report event %d: %d\n", event, ret); /* XXX */
+#endif
 
     /*
     gb_operation_destroy(operation);
@@ -303,7 +305,6 @@ static void gb_i2s_ll_tx_cb(struct ring_buf *rb,
     }
 
     if (gb_event) {
-lldbg("--- overrun from driver: %d\n", event);
         gb_i2s_report_event(info, gb_event);
         /* All events are halt streaming right now */
         gb_i2s_report_event(info, GB_I2S_EVENT_HALT);
@@ -323,7 +324,9 @@ static uint8_t gb_i2s_prepare_receiver(struct gb_i2s_info *info)
                     (info->samples_per_message * 1000000)) +
                GB_I2S_RX_RING_BUF_PAD;
 
+#if 0 /* XXX */
 lldbg("--- prepare_receiver: entries = %d\n", entries); /* XXX */
+#endif
 
     info->rx_rb = ring_buf_alloc_ring(entries,
                                     sizeof(struct gb_operation_hdr) +
@@ -1051,7 +1054,9 @@ int gb_i2s_mgmt_init(unsigned int cport)
     if (!info)
         return -ENOMEM;
 
+#if 0 /* XXX */
 lldbg("GB i2s info struct: 0x%08p\n", info); /* XXX */
+#endif
 
     info->mgmt_cport = cport;
     info->samples_per_message = GB_I2S_SAMPLES_PER_MSG_DEFAULT;
@@ -1135,7 +1140,9 @@ struct gb_driver i2s_mgmt_driver = {
 
 void gb_i2s_mgmt_register(int cport)
 {
+#if 0 /* XXX */
 lldbg("gb_i2s_mgmt_register: cport %d\n", cport);
+#endif
     gb_register_driver(cport, &i2s_mgmt_driver);
 }
 
@@ -1223,7 +1230,9 @@ struct gb_driver i2s_receiver_driver = {
 
 void gb_i2s_receiver_register(int cport)
 {
+#if 0 /* XXX */
 lldbg("gb_i2s_receiver_register: cport %d\n", cport);
+#endif
     gb_register_driver(cport, &i2s_receiver_driver);
 }
 
@@ -1251,6 +1260,8 @@ struct gb_driver i2s_transmitter_driver = {
 
 void gb_i2s_transmitter_register(int cport)
 {
+#if 0 /* XXX */
 lldbg("gb_i2s_transmitter_register: cport %d\n", cport);
+#endif
     gb_register_driver(cport, &i2s_transmitter_driver);
 }
