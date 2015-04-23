@@ -452,7 +452,9 @@ void unipro_init(void) {
 #ifdef UNIPRO_DEBUG
     unipro_info();
 #endif
+    /*
     lldbg("UniPro enabled\n");
+    */
 }
 
 /**
@@ -568,6 +570,8 @@ int unipro_driver_register(struct unipro_driver *driver, unsigned int cportid) {
 
     cport->driver = driver;
 
+    /*
     lldbg("Registered driver %s on CP%u\n", cport->driver->name, cport->cportid);
+    */
     return 0;
 }
