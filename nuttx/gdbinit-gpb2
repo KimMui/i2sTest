@@ -1,0 +1,4 @@
+target remote localhost:2341
+monitor reset
+file nuttx-gpb
+load

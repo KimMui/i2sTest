@@ -1,0 +1,6 @@
+target remote localhost:2331
+monitor reset
+file nuttx-apb1_only
+load
+b tsb_i2s_irq_so_err_handler
+b up_assert
