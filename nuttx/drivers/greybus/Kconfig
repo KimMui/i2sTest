@@ -16,3 +16,7 @@ config GREYBUS_BATTERY_PHY
 config GREYBUS_LOOPBACK_PHY
 	bool "Loopback support"
 	default n
+
+config GREYBUS_I2S_PHY
+	bool "I2S PHY support"
+	default n

@@ -125,14 +125,18 @@ void enable_cports(void)
                 gb_loopback_register(id);
             }
 #endif
+#ifdef CONFIG_GREYBUS_I2S_PHY
             if (protocol == GREYBUS_PROTOCOL_I2S_MGMT) {
                 gb_info("Registering I2S MGMT greybus driver.\n");
                 gb_i2s_mgmt_register(id);
-            }
-            if (protocol == GREYBUS_PROTOCOL_I2S_RECEIVER) {
+            } else if (protocol == GREYBUS_PROTOCOL_I2S_RECEIVER) {
+                gb_info("Registering I2S RECEIVER greybus driver.\n");
+                gb_i2s_receiver_register(id);
+            } else if (protocol == GREYBUS_PROTOCOL_I2S_TRANSMITTER) {
                 gb_info("Registering I2S RECEIVER greybus driver.\n");
                 gb_i2s_receiver_register(id);
             }
+#endif
         }
         i++;
     }
