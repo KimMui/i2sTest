@@ -39,4 +39,5 @@ CSRCS += i2s.c
 DEPPATH += --dep-path greybus
 VPATH += :greybus
 CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)greybus}
+CFLAGS += "-DAPPLY_UPRESAMPLING" "-DENABLE_DUAL_I2S_PORTS" "-DENABLE_AUDIO_MIXER"
 endif
