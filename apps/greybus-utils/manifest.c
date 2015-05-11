@@ -41,6 +41,8 @@
 struct gb_cport {
     int id;
     int protocol;
+// --KIMMUI_TEMP--
+    int bundle;
 };
 
 extern void gb_gpio_register(int cport);
@@ -178,6 +180,8 @@ static int identify_descriptor(struct greybus_descriptor *desc, size_t size,
                 cport = alloc_cport();
                 cport->id = desc->cport.id;
                 cport->protocol = desc->cport.protocol_id;
+// --KIMMUI_TEPM--
+                cport->bundle = desc->cport.bundle;
                 gb_debug("cport_id = %d\n", cport->id);
             } else {
                 free_cport(desc->cport.id);
@@ -338,4 +342,19 @@ void enable_manifest(char *name, void *priv)
     } else {
         gb_error("missing manifest blob, no hotplug event sent\n");
     }
+}
+
+// --KIMMUI_TEMP--
+int get_cport_bundle(int cport)
+{
+    int i = 0;
+    while (i < CPORT_MAX) {
+        if ((g_greybus.cports_bmp & (1 << i)) != 0) {
+        	if (g_greybus.cports[i].id == cport) {
+        		return g_greybus.cports[i].bundle;
+        	}
+        }
+        i++;
+    }
+    return -1;
 }
