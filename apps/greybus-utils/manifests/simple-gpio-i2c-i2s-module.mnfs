@@ -51,25 +51,25 @@ class = 0x00
 
 ; --KIMMUI_TEMP--
 ; I2S MGMT protocol on CPort 9
-[cport-descriptor "9"]
-bundle = 1
-id = 9
-protocol = 0x0a
+;[cport-descriptor "9"]
+;bundle = 1
+;id = 9
+;protocol = 0x0a
 
 ; --KIMMUI_TEMP--
 ; I2S RX protocol on CPort 10
-[cport-descriptor "10"]
-bundle = 1
-id = 10
-protocol = 0x12
+;[cport-descriptor "10"]
+;bundle = 1
+;id = 10
+;protocol = 0x12
 
 ; Bundle 0
-[bundle-descriptor "0"]
-id = 0
-class = 0x00
+;[bundle-descriptor "0"]
+;id = 0
+;class = 0x00
 
 ; --KIMMUI_TEMP--
 ; Bundle 1
-[bundle-descriptor "1"]
-id = 1
-class = 0x00
+;[bundle-descriptor "1"]
+;id = 1
+;class = 0x00
