@@ -238,6 +238,7 @@ static struct gb_i2s_dev_info gb_i2s_dev_info_map[] = {
     },
 #ifdef ENABLE_DUAL_I2S_PORTS
     {
+
         .bundle_id  = GB_I2S_BUNDLE_1_ID, /*TODO: Fix when bundles implemented*/
         .dev_type   = DEVICE_TYPE_I2S_HW,
         .dev_id     = GB_I2S_BUNDLE_1_DEV_ID,
@@ -781,7 +782,6 @@ static uint8_t gb_mixer_start_transmitter(enum gb_mixer_op_type op_type)
     int ret;
     int frame_sent = 0;
     irqstate_t irq_flags      = 0;
-    int buffer_length         = 0;
     struct ring_buf *dest_rb  = NULL;
 
 	irq_flags = irqsave();
@@ -814,7 +814,7 @@ static uint8_t gb_mixer_start_transmitter(enum gb_mixer_op_type op_type)
 
     		ring_buf_reset(dest_rb);
     		if (avail_channels == 1) {
-    		    memcpy(ring_buf_get_head(dest_rb), ring_buf_get_head(src_rb[0]), buffer_length);
+    		    memcpy(ring_buf_get_head(dest_rb), ring_buf_get_head(src_rb[0]), mixing_samples);
                 // lldbg("====> %x, %d\n", dest_rb, mixing_samples);
     		} else {
     			gb_mixer_mix_audio_channels(dest_rb, &src_rb[0], avail_channels, mixing_samples);
