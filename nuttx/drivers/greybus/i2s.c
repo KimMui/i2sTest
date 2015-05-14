@@ -1744,7 +1744,14 @@ lldbg("GB i2s info struct: 0x%08p\n", info); /* XXX */
 #else
     if ((atomic_inc(&gb_mixer.total_channel_count) == 1) &&
     	(gb_mixer.dev == NULL)) {
-        gb_mixer.dev = device_open(dev_info->dev_type, dev_info->dev_id);
+        int index;
+
+        for (index = 0; index < MAX_AUDIO_CHANNELS; index++) {
+        	gb_mixer.audio_channels[index].channel_info = NULL;
+        	gb_mixer.audio_channels[index].rx_rb = NULL;
+        }
+
+    	gb_mixer.dev = device_open(dev_info->dev_type, dev_info->dev_id);
     }
     if (!gb_mixer.dev) {
 #endif
