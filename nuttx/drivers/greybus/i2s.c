@@ -720,7 +720,7 @@ static int gb_mixer_ring_buf_get_next(
 {
     int index;
 
-    for (index = 0; index < MAX_AUDIO_CHANNELS; index++)
+    for (index = 0; index < avail_channels; index++)
     {
     	src_rb[index] = audio_channels[index]->rx_rb;
         if (ring_buf_len(audio_channels[index]->rx_rb) <= samples_count) {
@@ -749,7 +749,7 @@ static int gb_mixer_mix_audio_channels(
     {
     	unsigned int output_sample = 0;
 
-        for (channel_index = 0; channel_index < channel_index; channel_index++) {
+        for (channel_index = 0; channel_index < src_channel_count; channel_index++) {
         	output_sample += src[channel_index][sample_index];
         }
 
