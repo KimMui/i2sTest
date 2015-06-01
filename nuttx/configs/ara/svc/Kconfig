@@ -10,3 +10,15 @@ config SVC_ROUTE_DEFAULT
 config SVC_ROUTE_SPRING6_APB2
     bool "AP Module to APB2"
 endchoice
+
+config ARA_DUAL_I2S_PORTS
+	bool "Dual I2S routing to APB2"
+	default n
+	---help---
+        Enable the dual I2S CPorts on APB2.
+
+config ARA_STREAM_FROM_APB3_TO_APB2
+	bool "Stream I2S to APB2 from APB3"
+	default n
+	---help---
+        Enable the streaming an audio from APB3 to APB2.
