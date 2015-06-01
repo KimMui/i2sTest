@@ -102,7 +102,7 @@ struct svc_connection {
 #define DEMO_I2S_RX_APB2_CPORT_1   (10)
 #endif
 
-#ifdef STREAM_AUDIO_FROM_APB3
+#ifdef CONFIG_ARA_STREAM_FROM_APB3_TO_APB2
 #define DEV_ID_APB3             (3)
 
 #define DEMO_I2S_MGMT_APB3_CPORT_1 (4)
