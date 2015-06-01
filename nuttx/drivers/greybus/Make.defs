@@ -35,9 +35,13 @@ CSRCS += i2c.c
 CSRCS += battery.c
 CSRCS += loopback.c
 CSRCS += i2s.c
+CSRCS += rescale_pcm.c
 
 DEPPATH += --dep-path greybus
 VPATH += :greybus
 CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)greybus}
-CFLAGS += "-DAPPLY_UPRESAMPLING" "-DENABLE_DUAL_I2S_PORTS" "-DENABLE_AUDIO_MIXER"
+CFLAGS += "-DENABLE_UPSCALE_RESAMPLING" "-DENABLE_DUAL_I2S_PORTS" "-DENABLE_AUDIO_MIXER"
+ifeq ($(CONFIG_ARA_AUDIO_STREAM),y)
+CFLAGS += "-DNO_I2S_AUDIO_DEVICE"
+endif
 endif

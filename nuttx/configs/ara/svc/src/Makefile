@@ -71,6 +71,12 @@ ifeq ($(WINTOOL),y)
 			   -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
 else
   CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/armv7-m
+ifeq ($(CONFIG_ARA_AUDIO_STREAM),y)
+  CFLAGS += "-DSTREAM_AUDIO_FROM_APB3"
+endif
+ifeq ($(CONFIG_ARA_ENABLE_DUAL_I2S),y)
+  CFLAGS += "-DENABLE_DUAL_I2S_PORTS"
+endif
 endif
 
 all: libboard$(LIBEXT)

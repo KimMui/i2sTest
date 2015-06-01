@@ -92,6 +92,10 @@ ifeq ($(CONFIG_MANIFEST_GPIO_I2C_I2S), y)
  MANIFEST = simple-gpio-i2c-i2s-module
 endif
 
+ifeq ($(CONFIG_MANIFEST_I2S_AUDIO), y)
+ MANIFEST = simple-i2s-audio-module
+endif
+
 ifeq ($(CONFIG_MANIFEST_BATTERY_GPIO_I2C), y)
  MANIFEST = simple-battery-gpio-i2c-module
 endif

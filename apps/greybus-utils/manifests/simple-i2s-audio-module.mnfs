@@ -1,0 +1,40 @@
+;
+; Simple I2C Interface Manifest
+;
+
+[manifest-header]
+version-major = 0
+version-minor = 1
+
+[interface-descriptor]
+vendor-string-id = 1
+product-string-id = 2
+
+; Interface vendor string (id can't be 0)
+[string-descriptor "1"]
+id = 1
+string = "Project Ara"
+
+; Interface product string (id can't be 0)
+[string-descriptor "2"]
+id = 2
+string = "Simple Audio Stream Interface"
+
+; I2S MGMT protocol on CPort 4
+[cport-descriptor "4"]
+bundle = 1
+id = 4
+protocol = 0x0a
+
+; I2S RX protocol on CPort 6
+[cport-descriptor "6"]
+bundle = 1
+id = 6
+protocol = 0x12
+
+; --KIMMUI_TEMP--
+; Bundle 1
+[bundle-descriptor "1"]
+id = 1
+class = 0x00
+
