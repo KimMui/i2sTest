@@ -85,9 +85,6 @@ struct svc_connection {
  */
 #define DEV_ID_APB1             (1)
 #define DEV_ID_APB2             (2)
-#ifdef STREAM_AUDIO_FROM_APB3
-#define DEV_ID_APB3             (3)
-#endif
 #define DEV_ID_SPRING6          (8)
 #define DEMO_GPIO_APB1_CPORT    (0)
 #define DEMO_GPIO_APB2_CPORT    (5)
@@ -98,15 +95,16 @@ struct svc_connection {
 #define DEMO_I2S_RX_APB1_CPORT   (3)
 #define DEMO_I2S_RX_APB2_CPORT   (7)
 
-// --KIMMUI_TEMP--
-//#ifdef ENABLE_DUAL_I2S_PORTS
+#ifdef CONFIG_ARA_DUAL_I2S_PORTS
 #define DEMO_I2S_MGMT_APB1_CPORT_1 (4)
 #define DEMO_I2S_MGMT_APB2_CPORT_1 (9)
 #define DEMO_I2S_RX_APB1_CPORT_1   (5)
 #define DEMO_I2S_RX_APB2_CPORT_1   (10)
-//#endif
+#endif
 
 #ifdef STREAM_AUDIO_FROM_APB3
+#define DEV_ID_APB3             (3)
+
 #define DEMO_I2S_MGMT_APB3_CPORT_1 (4)
 #define DEMO_I2S_RX_APB3_CPORT_1   (6)
 #endif
@@ -118,7 +116,7 @@ struct svc_connection {
 static struct svc_interface_device_id devid[] = {
     { "apb1", DEV_ID_APB1 },
     { "apb2", DEV_ID_APB2 },
-#ifdef STREAM_AUDIO_FROM_APB3
+#ifdef CONFIG_ARA_STREAM_FROM_APB3_TO_APB2
     { "apb3", DEV_ID_APB3 },
 #endif
     { "spring6", DEV_ID_SPRING6 },
@@ -138,8 +136,8 @@ static struct svc_connection conn[] = {
     { DEV_ID_APB1, DEMO_I2S_RX_APB1_CPORT,
       DEV_ID_APB2, DEMO_I2S_RX_APB2_CPORT },
 
-#ifdef ENABLE_DUAL_I2S_PORTS
-#ifndef STREAM_AUDIO_FROM_APB3
+#ifdef CONFIG_ARA_DUAL_I2S_PORTS
+#ifndef CONFIG_ARA_STREAM_FROM_APB3_TO_APB2
     { DEV_ID_APB1, DEMO_I2S_MGMT_APB1_CPORT_1,
       DEV_ID_APB2, DEMO_I2S_MGMT_APB2_CPORT_1 },
     { DEV_ID_APB1, DEMO_I2S_RX_APB1_CPORT_1,
