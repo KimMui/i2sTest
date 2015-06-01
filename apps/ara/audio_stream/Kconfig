@@ -1,0 +1,23 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config ARA_AUDIO_STREAM
+	bool "Ara AUDIO STREAM Test Program"
+	default n
+	---help---
+        Enable the Toshiba I2S low-level device driver test program.
+        Note that this program does not exit.
+
+if ARA_AUDIO_STREAM
+
+config ARA_AUDIO_STREAM_PROGNAME
+	string "Program name"
+	default "audio_stream"
+	depends on BUILD_KERNEL
+	---help---
+		This is the name of the program that will be used when the
+		NSH ELF program is installed.
+
+endif
