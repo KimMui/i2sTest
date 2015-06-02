@@ -81,6 +81,12 @@ config ARCH_CHIP_DEVICE_I2S
     bool
     default n
 
+config ARCH_CHIP_SYSTICK_RELOAD
+	int "System Time Tick Reload value"
+	default 960000
+	---help---
+		In the "normal" configuration where system time tick reload value is 960000
+
 config ARCH_CHIP_TSB_I2S
     bool "I2S Support"
     depends on ARCH_CHIP_GPBRIDGE

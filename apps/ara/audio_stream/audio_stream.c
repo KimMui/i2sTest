@@ -291,12 +291,13 @@ static void *send_data_thread(void *parm)
 	PTHREAD_CONTEXT context       = (PTHREAD_CONTEXT)parm;
 	unsigned int sample_number    = 0;
 
-	lldbg("Worker Thread Started!\n");
+	lldbg("Worker Thread Started(%d, %d)!\n", CONFIG_ARCH_CHIP_SYSTICK_RELOAD, CONFIG_USEC_PER_TICK );
 
 	while (context->loop_count--)
 	{
 	    sem_wait(&context->sem);
 
+		//lldbg("===>!\n");
 		ret = send_data(context->samples_per_packet, sample_number++);
 
         if (ret) {
@@ -337,6 +338,27 @@ static int stream_audio(unsigned int samples_per_packet, unsigned int packets_to
 
     clock_gettime(CLOCK_REALTIME, &tm);
     tm.tv_sec += 1;
+
+#if 0
+    while (loop_count < 20)
+    {
+        ret = sem_timedwait(&sem, &tm);
+
+        if (ret && (errno != ETIMEDOUT)) {
+            lldbg("sem_timedwait failed. loopCount=%d, rc=%d errno=%d!\n", context.loop_count, ret, errno);
+        }
+
+        if (errno == EINTR)
+        {
+            lldbg("wait for sem. count=%d rc=%d errno=%d!\n", context.loop_count, ret, errno);
+        } else {
+            tm.tv_sec++;
+        }
+    	loop_count++;
+    }
+
+    return 0;
+#endif
 
     while (!context.done)
     {
