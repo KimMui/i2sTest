@@ -18,4 +18,5 @@ source "$APPSDIR/ara/pwm/Kconfig"
 source "$APPSDIR/ara/gpio/Kconfig"
 source "$APPSDIR/ara/bdbpm/Kconfig"
 source "$APPSDIR/ara/i2s/Kconfig"
+source "$APPSDIR/ara/audio_stream/Kconfig"
 
