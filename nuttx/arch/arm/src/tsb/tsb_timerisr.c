@@ -10,7 +10,11 @@
 #include "up_arch.h"
 
 /* 96 MHz */
+#ifndef CONFIG_ARCH_CHIP_SYSTICK_RELOAD
 #define SYSTICK_RELOAD 960000
+#else
+#define SYSTICK_RELOAD CONFIG_ARCH_CHIP_SYSTICK_RELOAD
+#endif
 
 int up_timerisr(int irq, uint32_t *regs)
 {
