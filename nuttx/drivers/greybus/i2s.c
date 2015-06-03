@@ -990,6 +990,54 @@ static uint8_t gb_mixer_start_transmitter(enum gb_mixer_op_type op_type)
         if ((mixing_data_length > 0) &&
         	((avail_channels == gb_mixer.active_rx_channel_count) || (op_type == GB_I2S_INSERT_AUDIO_FRAME))) //(avail_channels > 0))
     	{
+#if 1
+        	int output_buf_space;
+
+            gb_mixer.rx_rb = ring_buf_get_next(dest_rb);
+            gb_mixer.rx_rb_count++;
+            gb_mixer.rx_rb_total_count++;
+
+    		ring_buf_reset(dest_rb);
+//lldbg("==1==> %d\n", ring_buf_space(dest_rb));
+            while (mixing_data_length && (output_buf_space = ring_buf_space(dest_rb)) > 0) {
+            	struct ring_buf *src_rb[MAX_AUDIO_CHANNELS]  = {NULL};
+
+//lldbg("==2==> %d, %d\n", output_buf_space, mixing_data_length);
+            	if (output_buf_space < mixing_data_length) {
+            		mixing_data_length = output_buf_space;
+            	}
+
+                gb_mixer_ring_buf_get_next(&audio_channels[0],
+                		avail_channels,
+    					mixing_data_length,
+    					src_rb);
+
+                irqrestore(irq_flags);
+
+    		    if (avail_channels == 1) {
+        			//lldbg("copy %d bytes\n", mixing_data_length);
+        		    memcpy(ring_buf_get_head(dest_rb), ring_buf_get_head(src_rb[0]), mixing_data_length);
+        		} else {
+        			gb_mixer_mix_audio_channels(dest_rb, &src_rb[0], avail_channels, mixing_data_length);
+        		}
+
+//    		    lldbg("put %d bytes(%x)\n", mixing_data_length, dest_rb);
+                ring_buf_put(dest_rb, mixing_data_length);
+
+                gb_mixer_ring_buf_pull_and_pass(&src_rb[0], avail_channels, mixing_data_length);
+
+                irq_flags = irqsave();
+
+                op_type = GB_I2S_MIX_AUDIO_CHANNELS;
+                mixing_data_length = gb_mixer_get_available_audio_samples(&audio_channels[0],
+                		                                              &avail_channels,
+        															  op_type);
+            }
+            ring_buf_pass(dest_rb);
+            irqrestore(irq_flags);
+
+            frames_sent++;
+#else
         	struct ring_buf *src_rb[MAX_AUDIO_CHANNELS]  = {NULL};
 
             gb_mixer.rx_rb = ring_buf_get_next(dest_rb);
@@ -1020,6 +1068,7 @@ static uint8_t gb_mixer_start_transmitter(enum gb_mixer_op_type op_type)
 
             frames_sent++;
             op_type = GB_I2S_MIX_AUDIO_CHANNELS;
+#endif
     	}
     	else
     	{
