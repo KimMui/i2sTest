@@ -44,6 +44,7 @@
 #include <nuttx/device.h>
 #include <nuttx/device_i2s.h>
 #include <nuttx/ring_buf.h>
+#include <nuttx/clock.h>
 
 #include <nuttx/greybus/types.h>
 #include <arch/armv7-m/byteorder.h>
@@ -64,7 +65,7 @@
 #define ONE_MICROSECOND             1000
 #define ONE_SECOND                  1000000000L
 
-#define I2S_START_DELAY             10000   // 10ms start delay
+#define I2S_START_DELAY             5000   // 5ms start delay
 
 #define USE_SEND_REQUEST_SYNC
 
@@ -73,14 +74,6 @@
 #else
 #define SEND_REQEST(op)            gb_operation_send_request_sync(op)
 #endif
-
-typedef struct state_s
-{
-    unsigned int loop_count;
-    unsigned int samples_per_packet;
-    int done;
-    sem_t sem;
-} THREAD_CONTEXT, *PTHREAD_CONTEXT;
 
 
 static int set_i2s_configuration(unsigned int sample_rate)
@@ -285,54 +278,12 @@ static int send_data(unsigned int number_of_samples, __le32 sample_number)
     return ret;
 }
 
-static void *send_data_thread(void *parm)
-{
-    int ret                       = 0;
-	PTHREAD_CONTEXT context       = (PTHREAD_CONTEXT)parm;
-	unsigned int sample_number    = 0;
-
-	lldbg("Worker Thread Started(%d, %d)!\n", CONFIG_ARCH_CHIP_SYSTICK_RELOAD, CONFIG_USEC_PER_TICK );
-
-	while (context->loop_count--)
-	{
-	    sem_wait(&context->sem);
-
-		//lldbg("===>!\n");
-		ret = send_data(context->samples_per_packet, sample_number++);
-
-        if (ret) {
-      	    lldbg("failed to send audio data. count = %d\n", context->loop_count);
-        }
-	}
-
-	context->done = 1;
-
-	lldbg("Worker Thread Ended!\n");
-
-	return NULL;
-}
-
 static int stream_audio(unsigned int samples_per_packet, unsigned int packets_to_send, unsigned int packet_delay)
 {
-	THREAD_CONTEXT  context;
-	pthread_t       threadid;
     struct timespec tm;
     sem_t           sem;
     int             ret = 0;
-
     int             loop_count = 0;
-
-    context.done = 0;
-    context.loop_count = packets_to_send;
-    context.samples_per_packet = samples_per_packet;
-    sem_init(&context.sem, 0, 0);
-
-    ret = pthread_create(&threadid, NULL, send_data_thread, &context);
-    if (ret != 0)
-    {
-        lldbg("failed to create thread.\n");
-        return 0;
-    }
 
     sem_init(&sem, 0, 0);
 
@@ -340,10 +291,12 @@ static int stream_audio(unsigned int samples_per_packet, unsigned int packets_to
     tm.tv_sec += 1;
 
 #if 0
+    // Use this to test if system tick is correct!
     while (loop_count < 20)
     {
         ret = sem_timedwait(&sem, &tm);
 
+        lldbg("====> %d\n", MSEC_PER_TICK);
         if (ret && (errno != ETIMEDOUT)) {
             lldbg("sem_timedwait failed. loopCount=%d, rc=%d errno=%d!\n", context.loop_count, ret, errno);
         }
@@ -360,19 +313,19 @@ static int stream_audio(unsigned int samples_per_packet, unsigned int packets_to
     return 0;
 #endif
 
-    while (!context.done)
+    while (packets_to_send > loop_count)
     {
         ret = sem_timedwait(&sem, &tm);
 
         if (ret && (errno != ETIMEDOUT)) {
-            lldbg("sem_timedwait failed. loopCount=%d, rc=%d errno=%d!\n", context.loop_count, ret, errno);
+            lldbg("sem_timedwait failed. loopCount=%d, rc=%d errno=%d!\n", loop_count, ret, errno);
         }
 
         if (errno == EINTR)
         {
-            lldbg("wait for sem. count=%d rc=%d errno=%d!\n", context.loop_count, ret, errno);
+            lldbg("wait for sem. count=%d rc=%d errno=%d!\n", loop_count, ret, errno);
         } else {
-            sem_post(&context.sem);
+            send_data(samples_per_packet, loop_count);
 
             tm.tv_nsec += (packet_delay * ONE_MICROSECOND);
             if (tm.tv_nsec >= ONE_SECOND)
@@ -380,17 +333,12 @@ static int stream_audio(unsigned int samples_per_packet, unsigned int packets_to
                 tm.tv_sec += 1;
                 tm.tv_nsec -= ONE_SECOND;
             }
-            if ((context.loop_count % 100) == 0)
-            {
-                lldbg("loopCount = %d.\n", context.loop_count);
-            }
         }
-    	loop_count++;
+        loop_count++;
     }
 
-    lldbg("Waiting thread to finish(loopCount=%d)!\n", loop_count);
+    lldbg("Send Data ended(loopCount=%d)!\n", loop_count);
 
-    ret = pthread_join(threadid, NULL);
     if (ret != 0)
     {
         lldbg("failed to wait for thread to terminate.\n");
@@ -407,47 +355,51 @@ int audio_stream_main(int argc, char *argv[])
 #endif
 {
     int ret = 0;
-    unsigned int frequency_rate          = SAMPLE_FREQUENCY;
+    unsigned int samples_rate            = SAMPLE_FREQUENCY;
     unsigned int sample_count_per_packet = 0;
-    unsigned int packet_delay            = RESCHEDULE_TIME;
+    unsigned int packet_rate             = RESCHEDULE_TIME;
     unsigned int packet_count            = 10000;
+    unsigned int start_delay             = I2S_START_DELAY;
     int          option;
 
 	lldbg("=>%d, %s\n", argc, argv[0] );
-    while ((option = getopt(argc, argv, "af:c:d:p:")) != ERROR) {
+    while ((option = getopt(argc, argv, "ar:s:f:p:d:")) != ERROR) {
     	lldbg("==> opt=%d, %s\n", option, optarg);
         switch(option) {
-        case 'f':
-    	    frequency_rate = (optarg == NULL) ? SAMPLE_FREQUENCY : atoi(optarg);
+        case 'r':
+        	samples_rate = (optarg == NULL) ? SAMPLE_FREQUENCY : atoi(optarg);
             break;
-        case 'c':
+        case 's':
       	    sample_count_per_packet = (optarg == NULL) ? 0 : atoi(optarg);
             break;
-        case 'd':
-    	    packet_delay = (optarg == NULL) ? RESCHEDULE_TIME : atoi(optarg);
+        case 'f':
+        	packet_rate = (optarg == NULL) ? RESCHEDULE_TIME : atoi(optarg);
             break;
         case 'p':
     	    packet_count = (optarg == NULL) ? 10000 : atoi(optarg);
+            break;
+        case 'd':
+    	    packet_count = (optarg == NULL) ? I2S_START_DELAY : atoi(optarg);
             break;
         default:
             break;
         }
     }
 
-    if (!packet_delay) {
-    	packet_delay = 1;
+    if (!packet_rate) {
+    	packet_rate = 1000;
     }
 
     if (!sample_count_per_packet) {
-    	sample_count_per_packet = frequency_rate / packet_delay;
+    	sample_count_per_packet = ((samples_rate/1000) * packet_rate) / 1000;
     }
 
     lldbg("freq=%d, spp=%d, delay=%d, count=%d.\n",
-    		frequency_rate, sample_count_per_packet, packet_delay, packet_count);
+    		samples_rate, sample_count_per_packet, packet_rate, packet_count);
 
     // return 0;
 
-    ret = set_i2s_configuration(frequency_rate);
+    ret = set_i2s_configuration(samples_rate);
     if (ret)
     	return 0;
 
@@ -463,7 +415,7 @@ int audio_stream_main(int argc, char *argv[])
     if (ret)
     	return 0;
 
-    ret = stream_audio(sample_count_per_packet, packet_count, packet_delay);
+    ret = stream_audio(sample_count_per_packet, packet_count, packet_rate);
     if (ret)
     	return 0;
 

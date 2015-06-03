@@ -458,7 +458,8 @@ static void gb_i2s_mixer_ll_tx_cb(struct ring_buf *rb,
 
             // gb_mixer.rx_rb_underrun_count++;
         } else {
-        	if (gb_mixer.rx_rb_count < (GB_I2S_RX_RING_BUF_PAD >> 1)) {
+        	//if (gb_mixer.rx_rb_count < (GB_I2S_RX_RING_BUF_PAD >> 1)) {
+           	if (gb_mixer.rx_rb_count < 6) {
         		sem_post(&gb_mixer.rx_rb_sem);
         	}
         }
@@ -688,7 +689,7 @@ static uint8_t gb_i2s_prepare_receiver(struct gb_i2s_info *info)
 
     /* (sample_freq / samples_per_msg) * (delay_in_us / 1,000,000) */
     entries = ((sample_frequency * info->delay) /
-               (output_samples_per_frame * 1000000)) +
+               (info->samples_per_message * 1000000)) +
                GB_I2S_RX_RING_BUF_PAD;
 
     lldbg(" input_size=%d, input_fr=%d, input_dl=%d, input_spm=%d\n",
@@ -855,9 +856,11 @@ static unsigned int gb_mixer_get_available_audio_samples(
 		audio_channel = &gb_mixer.audio_channels[index];
 
 		if (audio_channel->channel_info != NULL) {
-		   if ((audio_channel->channel_info->flags & GB_I2S_FLAGS_RX_STARTED) &&
-			   (ring_buf_is_consumers(audio_channel->rx_rb)))
-		   {
+			if (!(audio_channel->channel_info->flags & GB_I2S_FLAGS_RX_STARTED)) {
+				continue;
+			}
+
+		    if (ring_buf_is_consumers(audio_channel->rx_rb)) {
 			   unsigned int rb_avail_samples;
 
 			   audio_channels[*avail_channels] = audio_channel;
@@ -868,7 +871,7 @@ static unsigned int gb_mixer_get_available_audio_samples(
 			   }
 			   (*avail_channels)++;
 		   } else {
-			   if (op_type == GB_I2S_INSERT_AUDIO_FRAME) {
+			   if (op_type == GB_I2S_INSERT_AUDIO_FRAME){
 			       // gb_i2s_report_event(audio_channel->channel_info, GB_I2S_EVENT_UNDERRUN);
 			       audio_channel->channel_info->rx_rb_underrun_count++;
 			   }
@@ -1857,6 +1860,7 @@ static uint8_t gb_i2s_activate_cport_req_handler(struct gb_operation *operation)
     uint8_t ret = GB_OP_SUCCESS;
 
     lldbg("Reveiced activate_cport %d.\n", request->cport);
+	lldbg("SYSTICK_RELOAD=%d, USEC_PER_SEC=%d)!\n", CONFIG_ARCH_CHIP_SYSTICK_RELOAD, CONFIG_USEC_PER_TICK );
 
     info = gb_i2s_get_info(operation->cport);
     if (!info)
@@ -1872,6 +1876,7 @@ static uint8_t gb_i2s_activate_cport_req_handler(struct gb_operation *operation)
     if (cple->state != GB_I2S_CPORT_STATE_INACTIVE)
         return GB_OP_PROTOCOL_BAD;
 
+
     if ((info->active_tx_cports + info->active_rx_cports) == 0) {
         info->msg_data_size = info->sample_size * info->samples_per_message;
 
@@ -1883,7 +1888,7 @@ static uint8_t gb_i2s_activate_cport_req_handler(struct gb_operation *operation)
         allocated_dummy_data = 1;
     }
 
-    switch (cple->type) {
+    		switch (cple->type) {
     case GB_I2S_CPORT_TYPE_RECEIVER:
     	lldbg("GB_I2S_CPORT_TYPE_RECEIVER\n");
         if (!info->active_rx_cports) {
